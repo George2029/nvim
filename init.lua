@@ -1,7 +1,7 @@
 require("keymaps");
 
 local lspconfig = require('lspconfig')
-local null_ls = require("null-ls")
+--local null_ls = require("null-ls")
 
 local on_attach = function(client, bufnr)
     local augroup = vim.api.nvim_create_augroup("LspFormatting", { clear = false })
@@ -12,24 +12,32 @@ local on_attach = function(client, bufnr)
             group = augroup,
             buffer = bufnr,
             callback = function()
-                vim.lsp.buf.format({ bufnr = bufnr })
+                vim.lsp.buf.format()
             end,
         })
     end
 end
+                 --   bufnr = bufnr,
+                    -- This ensures that only null-ls formats your code
+                 --   filter = function(client)
+                 --       return client.name == "null-ls"
+                 --   end,
 
-null_ls.setup({
-    sources = {
-        null_ls.builtins.formatting.prettier,
-        null_ls.builtins.diagnostics.eslint.with({extra_args = { "--no-warn-ignored" } }),
-        -- null_ls.builtins.completion.spell,
-    },
-    on_attach = on_attach,
-})
+
+--null_ls.setup({
+--    sources = {
+--        null_ls.builtins.formatting.prettier.with({
+--            command = "prettier",
+--        }),
+--        null_ls.builtins.diagnostics.eslint.with({ extra_args = { "--no-warn-ignored" } }),
+--    },
+--    on_attach = on_attach,
+--})
 
 lspconfig.pyright.setup({})
 
 lspconfig.ts_ls.setup({
+    on_attach = on_attach,
     init_options = {
         preferences = {
             disableSuggestions = true,
@@ -37,4 +45,15 @@ lspconfig.ts_ls.setup({
     },
 })
 
+lspconfig.rust_analyzer.setup({
+    on_attach = on_attach,
+    settings = {
+        ["rust-analyzer"] = {
+            cargo = { allFeatures = true },
+            checkOnSave = {
+                command = "clippy", -- Use Clippy for linting
+            },
+        },
+    },
+})
 
